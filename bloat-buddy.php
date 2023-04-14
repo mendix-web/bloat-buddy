@@ -61,7 +61,8 @@ register_deactivation_hook( __FILE__, 'deactivate_bloat_buddy' );
  * @author     Matthew Szklarz <mszklarz@gmail.com>
  */
 class Bloat_Buddy {
-	private int $critically_close = 100000;
+	private int $mb_limit_1 = 800000;
+	private int $mb_limit_2 = 1800000;
 
 	/**
 	 * 
@@ -88,28 +89,45 @@ class Bloat_Buddy {
 	 */
 	public function buddy_output_widget() {
 		global $wpdb;
-		$results = $wpdb->get_results(
-			"SELECT LENGTH(option_value),option_name FROM wp_options WHERE autoload='yes' ORDER BY length(option_value) DESC LIMIT 10;"
-		);
 
-		if( is_array( $results ) )
-		{
-			echo '<ul>';
-			foreach( $results as  $r )
-			{
-				$r = (array) $r;
-				$bytes = $r[ 'LENGTH(option_value)'];
+		if( $results = $wpdb->get_results(
+			"SELECT 'autoloaded data in KiB' as name, ROUND(SUM(LENGTH(option_value))) as value FROM wp_options WHERE autoload='yes' UNION SELECT 'autoloaded data count', count(*) FROM wp_options WHERE autoload='yes';"
+		) ) {
+			echo '<h3><b>Total Autoload Options Size</b></h3>';
+			if( $results ) {
+				$bytes = $results[0]->value;
 				printf( 
-					'<li><b style="color: %s">%s</b> %s bytes (%s)',
-					intval( $bytes ) > $this->critically_close ? 'red' : 'inherit',
-					$r[ 'option_name'], 
+					'<p style="color: %s">%s bytes (%s)</p>',
+					intval( $bytes ) > $this->mb_limit_2 ? 'red' : 'inherit',
 					$bytes,
 					$this->formatBytes( $bytes ),				
 				);
-			}
-			echo '</ul>';
+			}	
 		}
 
+		if( $results = $wpdb->get_results(
+			"SELECT LENGTH(option_value),option_name FROM wp_options WHERE autoload='yes' ORDER BY length(option_value) DESC LIMIT 10;"
+		) ) {
+			if( is_array( $results ) )
+			{
+				echo '<hr style="margin-top: 2rem">';
+				echo '<h3><b>Autoload Options Leaderboard</b></h3>';
+				echo '<ul>';
+				foreach( $results as  $r )
+				{
+					$r = (array) $r;
+					$bytes = $r[ 'LENGTH(option_value)'];
+					printf( 
+						'<li><b style="color: %s">%s</b> %s bytes (%s)',
+						intval( $bytes ) > $this->mb_limit_1 ? 'red' : 'inherit',
+						$r[ 'option_name'], 
+						$bytes,
+						$this->formatBytes( $bytes ),				
+					);
+				}
+				echo '</ul>';
+			}
+		}
 		$user_meta = get_userdata( get_current_user_id() );
 		if( in_array( 'administrator', $user_meta->roles ) )
 		{
