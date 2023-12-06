@@ -9,10 +9,10 @@
  */
 class Bloat_Buddy {
 
-	const BYTE_LIMIT_SINGLE      = 800000; // Warning limit for single options.
-	const BYTE_LIMIT_TOTAL       = 1800000; // Warning limit for total autoload wp_options.
+	const BYTE_LIMIT_SINGLE      = 800_000; // Warning limit for single options.
+	const BYTE_LIMIT_TOTAL       = 1_800_000; // Warning limit for total autoload wp_options.
 	const FREQ_NOTICE_EMAIL_DAYS = 3; // Frequency at which notice emails should be sent.
-	const SECONDS_PER_DAY        = 86400; // Amount of seconds in a day.
+	const SECONDS_PER_DAY        = 86_400; // Amount of seconds in a day.
 
 	/**
 	 * Undocumented function
@@ -63,9 +63,9 @@ class Bloat_Buddy {
 				);
 
 				if ( $is_over_limit ) {
-					$wpobb_email_dt = get_option( 'wpobb_email_dt' ) ?? 0;
-					$diff_dt        = time() - $wpobb_email_dt;
-					$diff_days      = $diff_dt / self::SECONDS_PER_DAY;
+						$wpobb_email_dt = get_option( 'wpobb_email_dt' ) ?? 0;
+						$diff_dt        = time() - $wpobb_email_dt;
+						$diff_days      = $diff_dt / self::SECONDS_PER_DAY;
 
 					if ( $diff_days > self::FREQ_NOTICE_EMAIL_DAYS ) {
 						$this->send_email_notice( $bytes_over_limit );
@@ -146,8 +146,8 @@ class Bloat_Buddy {
 	/**
 	 * Format bytes value into readable b, kb, mb, etc.
 	 *
-	 * @param integer $bytes Total amount of bytes to convert.
-	 * @param integer $precision Rounding precision.
+	 * @param  integer $bytes     Total amount of bytes to convert.
+	 * @param  integer $precision Rounding precision.
 	 * @return string
 	 */
 	private function format_bytes( int $bytes, int $precision = 2 ): string {
